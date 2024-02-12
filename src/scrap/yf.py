@@ -9,6 +9,14 @@ def liste_isin(csv_ordres: str = "./data/parquet/ordres.parquet") -> list[str]:
 
 
 def history_isin(isin: str) -> pl.DataFrame:
+    """A partir des codes ISIN récupère cotation et ticker de chaque titre
+
+    Args:
+        isin (str): code ISIN
+
+    Returns:
+        pl.DataFrame: 
+    """
     ticker = yf.Ticker(isin)
     history = ticker.history(start="2022-11-15", interval="1d")
 

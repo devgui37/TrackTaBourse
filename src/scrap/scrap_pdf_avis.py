@@ -166,5 +166,5 @@ def re_pipeline(dossier: str = "./data/"):
         info_pdf += 1
 
     datoum.write_parquet("./data/parquet/ordres.parquet")
-    print("Fichier parquet crée avec succès !")
+    print("Fichiers PDF scrapés avec succès.")
     return None

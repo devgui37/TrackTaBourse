@@ -6,12 +6,12 @@ from src.app.app_plot import (
     graph_repartition_type,
     grap_repartition_titre,
     graph_invest_month,
-    graph_port,
-    graph_var,
-    graph_inv_repartition,
+    graph_portefeuille_brut,
+    graph_portefeuille_variation,
+    graph_invest_carte,
 )
 from src.scrap.yf import liste_isin, evolution_port
-from src.app.app_function import *
+from src.app.app_function import remove_white_space, css_button, css_tabs
 
 df_ordres = pl.read_parquet("./data/parquet/ordres.parquet")
 df_releves = pl.read_parquet("./data/parquet/releves.parquet")
@@ -76,8 +76,8 @@ def main():
             + "€)",
         )
 
-    tab1, tab2, tab3 = st.tabs(
-        ["🔍 Composition", "👑 Performance", "🐣 Investissement"]
+    tab1, tab2, tab3 , tab4, tab5= st.tabs(
+        ["🔍 Composition", "👑 Performance", "🐣 Investissement", "💰 Dividende", "💸 Frais"]
     )
     with tab1:
         col1, col2 = st.columns([5, 1])
@@ -112,17 +112,17 @@ def main():
         else:
             graph_invest_month(df_ordres, temps="Mois")
         st.divider()
-        graph_inv_repartition(df_ordres)
+        graph_invest_carte(df_ordres)
 
     with tab2:
         st.subheader("Performance")
-        graph_port(datoum)
+        graph_portefeuille_brut(datoum)
         st.divider()
         on = st.toggle("% ou €")
         if on:
-            graph_var(datoum, "variation_eur")
+            graph_portefeuille_variation(datoum, "variation_eur")
         else:
-            graph_var(datoum, "variation")
+            graph_portefeuille_variation(datoum, "variation")
 
 
 if __name__ == "__main__":

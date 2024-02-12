@@ -65,7 +65,7 @@ def graph_invest_month(df_ordres: pl.DataFrame, temps: str) -> DeltaGenerator:
     return st.plotly_chart(fig)
 
 
-def graph_inv_repartition(datoum: pl.DataFrame) -> DeltaGenerator:
+def graph_invest_carte(datoum: pl.DataFrame) -> DeltaGenerator:
     infos = pl.read_parquet("./data/parquet/infos.parquet")
     datoum = datoum.join(infos, on = "isin", how = "left")
     datoum = datoum.with_columns(
@@ -95,7 +95,7 @@ def graph_inv_repartition(datoum: pl.DataFrame) -> DeltaGenerator:
     return st.plotly_chart(fig)
 
 
-def graph_port(datoum: pl.DataFrame) -> DeltaGenerator:
+def graph_portefeuille_brut(datoum: pl.DataFrame) -> DeltaGenerator:
     fig = px.area(datoum, x="date", y="total", title="Evolution du portefeuille",
                   labels={"date": "", "total": "Montant Total"})
     fig = fig.add_scatter(
@@ -118,7 +118,7 @@ def graph_port(datoum: pl.DataFrame) -> DeltaGenerator:
     return st.plotly_chart(fig)
 
 
-def graph_var(datoum: pl.DataFrame, type_variation: str) -> DeltaGenerator:
+def graph_portefeuille_variation(datoum: pl.DataFrame, type_variation: str) -> DeltaGenerator:
     fig = px.area(
         datoum, x="date", y=type_variation, title="Evolution des plus ou moins values",
         labels={"date": "", type_variation: "Variation"},
