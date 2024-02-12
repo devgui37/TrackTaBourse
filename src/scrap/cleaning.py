@@ -100,5 +100,5 @@ def clean_to_csv(df: pl.DataFrame) -> pl.DataFrame:
         pl.DataFrame: df clean
     """
     data = clean_pipeline(df)
-    data.write_parquet(r".\parquet\ordres.parquet")
+    data.write_parquet(r".\data\parquet\ordres.parquet")
     return print("Succès")

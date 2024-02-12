@@ -68,6 +68,6 @@ def create_csv_releves(dossier: str = ".\data") -> None:
     df = _create_dataframe(rl)
     df = _gestion_virement(df)
     df_final = _clean_pipeline_releves(df)
-    df_final.write_parquet(r".\parquet\releves.parquet")
+    df_final.write_parquet(r".\data\parquet\releves.parquet")
     print("Succès relevés parquet created")
     return None

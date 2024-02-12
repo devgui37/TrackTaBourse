@@ -13,8 +13,8 @@ from src.app.app_plot import (
 from src.scrap.yf import liste_isin, evolution_port
 from src.app.app_function import *
 
-df_ordres = pl.read_parquet("parquet/ordres.parquet")
-df_releves = pl.read_parquet("./parquet/releves.parquet")
+df_ordres = pl.read_parquet("./data/parquet/ordres.parquet")
+df_releves = pl.read_parquet("./data/parquet/releves.parquet")
 
 df_ordres_gb = tab_gb_cotation(df_ordres)
 df_resume = prepare_table(df_releves, df_ordres_gb)

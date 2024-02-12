@@ -3,7 +3,7 @@ import polars as pl
 import numpy as np
 
 
-def liste_isin(csv_ordres: str = "./parquet/ordres.parquet") -> list[str]:
+def liste_isin(csv_ordres: str = "./data/parquet/ordres.parquet") -> list[str]:
     list_isin = list(np.unique(pl.read_parquet(csv_ordres).select("isin")))
     return list_isin
 
@@ -18,7 +18,7 @@ def history_isin(isin: str) -> pl.DataFrame:
 
 
 def join_isin_ordres(data_isin: pl.DataFrame, isin: str):
-    df_ordres = pl.read_parquet("./parquet/ordres.parquet")
+    df_ordres = pl.read_parquet("./data/parquet/ordres.parquet")
     df_isin = df_ordres.filter(pl.col("isin") == isin)
     df_isin = df_isin.select("date", "nombre", "montant_net")
     df_cours = data_isin.join(df_isin, on="date", how="left")
@@ -33,7 +33,7 @@ def clean_join(df_cours: pl.DataFrame, isin: str) -> pl.DataFrame:
     )
     dd = dd.with_columns(pl.col("montant_net").fill_null(strategy="zero"))
     dd = dd.with_columns(pl.col("montant_net").cumsum())
-    dd.write_parquet(f"./parquet/{isin}.parquet")
+    dd.write_parquet(f"./data/parquet/{isin}.parquet")
     return print("Succès parquet")
 
 
@@ -41,7 +41,7 @@ def merged(variable: str, liste_isin: str, prefixe: str = "") -> pl.DataFrame:
     merged_df = None
 
     for isin in liste_isin:
-        df = pl.read_parquet(f"./parquet/{isin}.parquet").select("date", f"{variable}")
+        df = pl.read_parquet(f"./data/parquet/{isin}.parquet").select("date", f"{variable}")
         df = df.rename({f"{variable}": f"{prefixe}{isin}"})
         if merged_df is None:
             merged_df = df
@@ -70,7 +70,7 @@ def evolution_port(liste_isin: list[str]) -> pl.DataFrame:
     return datoum
 
 
-def yf_pipeline(dossier: str = "./parquet/ordres.parquet") -> None:
+def yf_pipeline(dossier: str = "./data/parquet/ordres.parquet") -> None:
     list_isin = liste_isin(dossier)
     for isin in list_isin:
         data = history_isin(isin)
@@ -90,5 +90,5 @@ def ticker():
         "ticker" : ticker,
         "name" : name}
     data = pl.DataFrame(df)
-    data.write_parquet("./data/infos.parquet")
+    data.write_parquet("./data/parquet/infos.parquet")
     return print("Infos parquet créée")

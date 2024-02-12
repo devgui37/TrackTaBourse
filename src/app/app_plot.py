@@ -66,7 +66,7 @@ def graph_invest_month(df_ordres: pl.DataFrame, temps: str) -> DeltaGenerator:
 
 
 def graph_inv_repartition(datoum: pl.DataFrame) -> DeltaGenerator:
-    infos = pl.read_parquet("./data/infos.parquet")
+    infos = pl.read_parquet("./data/parquet/infos.parquet")
     datoum = datoum.join(infos, on = "isin", how = "left")
     datoum = datoum.with_columns(
         pl.col("mois_annee").str.to_date("%m/%Y")
