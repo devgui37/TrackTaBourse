@@ -1,0 +1,9 @@
+polars
+streamlit
+yfinance
+numpy
+pdfplumber
+re
+glob
+os
+plotly.express
