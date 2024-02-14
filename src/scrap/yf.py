@@ -90,13 +90,16 @@ def ticker():
     list_isin = liste_isin()
     ticker = []
     name = []
+    type = []
     for isin in list_isin:
         titre = yf.Ticker(isin)
         ticker.append(titre.ticker)
         name.append(titre.info["longName"])
+        type.append(titre.get_info()["quoteType"])
     df = {"isin" : list_isin,
         "ticker" : ticker,
-        "name" : name}
+        "name" : name,
+        "type": type}
     data = pl.DataFrame(df)
     data.write_parquet("./data/parquet/infos.parquet")
     return print("Infos parquet créée")

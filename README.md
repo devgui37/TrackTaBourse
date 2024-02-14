@@ -1,4 +1,4 @@
-# TrackTaBourse
+# TrackTaBourse - ⏳ **En développemment**
 
 ## Infos Général
 
@@ -6,8 +6,6 @@
 | Banque        | Etat           |
 | ------------- |:-------------:|
 | BoursoBank     | ✅ |
-| Bourse Direct      | ❌      |
-| Fortuneo | ❌     |
 
 
 ## Utilisation

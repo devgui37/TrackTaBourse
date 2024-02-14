@@ -9,6 +9,8 @@ from src.app.app_plot import (
     graph_portefeuille_brut,
     graph_portefeuille_variation,
     graph_invest_carte,
+    graph_frais_moyen,
+    graph_coupon_temps
 )
 from src.scrap.yf import liste_isin, evolution_port
 from src.app.app_function import remove_white_space, css_button, css_tabs
@@ -16,6 +18,14 @@ from src.app.app_function import remove_white_space, css_button, css_tabs
 df_ordres = pl.read_parquet("./data/parquet/ordres.parquet")
 df_releves = pl.read_parquet("./data/parquet/releves.parquet")
 
+#frais
+infos = pl.read_parquet(".\data\parquet\infos.parquet").select("isin", "ticker")
+frais = df_ordres.select("date","isin", "nombre", "montant_brut","commission","frais","montant_net")
+df_frais = frais.join(infos, on="isin")
+df_frais = df_frais.with_columns((pl.col("commission") + pl.col("frais")).alias("ponction"))
+df_frais = df_frais.with_columns((100*pl.col("ponction")/pl.col("montant_net")).alias("taux_ponction"))
+#
+df_coupon = df_releves.filter(pl.col("type").str.starts_with("COUPON"))
 df_ordres_gb = tab_gb_cotation(df_ordres)
 df_resume = prepare_table(df_releves, df_ordres_gb)
 
@@ -123,6 +133,22 @@ def main():
             graph_portefeuille_variation(datoum, "variation_eur")
         else:
             graph_portefeuille_variation(datoum, "variation")
+    with tab4:
+        col1, col2 = st.columns([2,1])
+        with col1:
+            st.subheader("Dividendes versés")
+        with col2:
+            st.metric("Dividende",
+                    str(round(df_coupon.select("montant").sum().item(),2)) + " €")
+        graph_coupon_temps(df_releves,df_ordres, infos)
+    with tab5:
+        col1, col2 = st.columns([2,1])
+        with col1:
+            st.subheader("Prélévements des ordres")
+        with col2:
+            st.metric("Prélévement", 
+                    str(round(df_frais.select("ponction").sum().item(),2)) + " €")
+        graph_frais_moyen(df_ordres)
 
 
 if __name__ == "__main__":

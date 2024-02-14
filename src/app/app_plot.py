@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.express as px
 import polars as pl
 from streamlit.delta_generator import DeltaGenerator
-
+import plotly.graph_objects as go
 
 def graph_repartition_type(df: pl.DataFrame) -> DeltaGenerator:
     fig = px.pie(
@@ -125,3 +125,39 @@ def graph_portefeuille_variation(datoum: pl.DataFrame, type_variation: str) -> D
         color_discrete_sequence=["royalblue"]
     )
     return st.plotly_chart(fig)
+
+def graph_frais_moyen(df_ordres:pl.DataFrame):
+    infos = pl.read_parquet(".\data\parquet\infos.parquet").select("isin", "ticker","type")
+    frais = df_ordres.select("date","isin", "nombre", "montant_brut","commission","frais","montant_net")
+    df_frais = frais.join(infos, on="isin")
+    df_frais = df_frais.with_columns((pl.col("commission") + pl.col("frais")).alias("ponction"))
+    df_frais = df_frais.with_columns((100*pl.col("ponction")/pl.col("montant_net")).alias("taux_ponction"))
+    df_frais = df_frais.with_columns((100*pl.col("commission")/pl.col("montant_net")).alias("taux_commission"))
+    df_frais = df_frais.with_columns((100*pl.col("frais")/pl.col("montant_net")).alias("taux_frais"))
+
+    fig = px.scatter(df_frais, x = "montant_net", y = 'taux_commission',color='type',
+        trendline="lowess", trendline_options=dict(frac=1),
+        trendline_scope = 'overall',  trendline_color_override = 'orchid')
+    
+    fig.update_layout(legend=dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1,
+    xanchor="right",
+    x=0.9, 
+    title = ""
+    ))
+
+    return st.plotly_chart(fig)
+
+def graph_coupon_temps(df_releves, df_ordres, infos):
+    df_coupon = df_releves.filter(pl.col("type").str.starts_with("COUPON"))
+    df_coupon = df_coupon.rename({"titre": "produit"})
+    df_ordres_pi = df_ordres.select("produit", "isin").unique()
+    df_coupon_2 = df_coupon.join(df_ordres_pi, on = "produit").join(infos, on = "isin")
+    
+    fig = px.bar(df_coupon_2, x = "date", y = "montant", color="ticker",
+       color_discrete_sequence=px.colors.qualitative.G10)
+    
+    return st.plotly_chart(fig)
+
