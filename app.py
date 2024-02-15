@@ -12,25 +12,21 @@ from src.app.app_plot import (
     graph_frais_moyen,
     graph_coupon_temps
 )
-from src.scrap.yf import liste_isin, evolution_port
+from src.scrap.yf import get_list_isin, df_evolution_portefeuille
 from src.app.app_function import remove_white_space, css_button, css_tabs
+from src.app.app_data import dataframe_frais
 
 df_ordres = pl.read_parquet("./data/parquet/ordres.parquet")
 df_releves = pl.read_parquet("./data/parquet/releves.parquet")
-
-#frais
 infos = pl.read_parquet(".\data\parquet\infos.parquet").select("isin", "ticker")
-frais = df_ordres.select("date","isin", "nombre", "montant_brut","commission","frais","montant_net")
-df_frais = frais.join(infos, on="isin")
-df_frais = df_frais.with_columns((pl.col("commission") + pl.col("frais")).alias("ponction"))
-df_frais = df_frais.with_columns((100*pl.col("ponction")/pl.col("montant_net")).alias("taux_ponction"))
-#
+df_frais = dataframe_frais(df_ordres)
+
 df_coupon = df_releves.filter(pl.col("type").str.starts_with("COUPON"))
 df_ordres_gb = tab_gb_cotation(df_ordres)
 df_resume = prepare_table(df_releves, df_ordres_gb)
 
-list_isin = liste_isin()
-datoum = evolution_port(list_isin)
+list_isin = get_list_isin()
+datoum = df_evolution_portefeuille(list_isin)
 
 total_titre = round(df_resume.select("valeur").sum().item(), 2)
 total_div = (

@@ -2,7 +2,6 @@ import streamlit as st
 import plotly.express as px
 import polars as pl
 from streamlit.delta_generator import DeltaGenerator
-import plotly.graph_objects as go
 
 def graph_repartition_type(df: pl.DataFrame) -> DeltaGenerator:
     fig = px.pie(
@@ -96,11 +95,11 @@ def graph_invest_carte(datoum: pl.DataFrame) -> DeltaGenerator:
 
 
 def graph_portefeuille_brut(datoum: pl.DataFrame) -> DeltaGenerator:
-    fig = px.area(datoum, x="date", y="total", title="Evolution du portefeuille",
-                  labels={"date": "", "total": "Montant Total"})
+    fig = px.area(datoum, x="date", y="total_valeur", title="Evolution du portefeuille",
+                  labels={"date": "", "total_valeur": "Montant Total"})
     fig = fig.add_scatter(
         x=datoum["date"],
-        y=datoum["total_right"],
+        y=datoum["total_montant_net"],
         fill="tonexty",
         mode="lines",
         name="Prix de Revient",
@@ -158,6 +157,15 @@ def graph_coupon_temps(df_releves, df_ordres, infos):
     
     fig = px.bar(df_coupon_2, x = "date", y = "montant", color="ticker",
        color_discrete_sequence=px.colors.qualitative.G10)
+    
+    fig.update_layout(legend=dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1,
+    xanchor="right",
+    x=0.9, 
+    title = ""
+    ))
     
     return st.plotly_chart(fig)
 
