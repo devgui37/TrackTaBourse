@@ -48,7 +48,7 @@ delta_titre = round(
         df_resume.select("valeur").sum().item()
         - df_resume.select("montant_net").sum().item()
     )
-    / df_resume.select("montant_net").sum().item()
+    /  df_resume.select("montant_net").sum().item()
     * 100,
     2,
 )
@@ -101,7 +101,7 @@ def main():
                 delta_color="off",
             )
         with col2:
-            st.metric(label="Espèces", value=str(total_port - total_titre) + " €")
+            st.metric(label="Espèces", value=str(round(total_port - total_titre,2)) + " €")
         table_global(df_resume)
         st.divider()
         on = st.toggle("Graphique par type d'actif")
