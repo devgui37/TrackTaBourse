@@ -4,7 +4,7 @@ from cleaning import _clean_date, clean_format_R
 from scrap_pdf_avis import _extract_fichiers, _extract_text
 
 
-def _scraping_table_pdf(dossier: str = ".\data") -> list[str] :
+def _scraping_table_pdf(dossier: str = "./data") -> list[str] :
     resultats_list = []
     fichiers = _extract_fichiers(dossier, type="relevés")
     for fichier in fichiers:
@@ -68,6 +68,6 @@ def create_csv_releves(dossier: str = ".\data") -> None:
     df = _create_dataframe(rl)
     df = _gestion_virement(df)
     df_final = _clean_pipeline_releves(df)
-    df_final.write_parquet(r".\data\parquet\releves.parquet")
+    df_final.write_parquet("./data/parquet/releves.parquet")
     print("Succès relevés parquet created")
     return None

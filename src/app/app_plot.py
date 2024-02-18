@@ -126,7 +126,7 @@ def graph_portefeuille_variation(datoum: pl.DataFrame, type_variation: str) -> D
     return st.plotly_chart(fig)
 
 def graph_frais_moyen(df_ordres:pl.DataFrame):
-    infos = pl.read_parquet(".\data\parquet\infos.parquet").select("isin", "ticker","type")
+    infos = pl.read_parquet("./data/parquet/infos.parquet").select("isin", "ticker","type")
     frais = df_ordres.select("date","isin", "nombre", "montant_brut","commission","frais","montant_net")
     df_frais = frais.join(infos, on="isin")
     df_frais = df_frais.with_columns((pl.col("commission") + pl.col("frais")).alias("ponction"))
