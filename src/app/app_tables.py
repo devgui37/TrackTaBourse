@@ -40,7 +40,7 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
 
         lasts_days = df_cotation.select(isin).tail(2)
         day_variation.append((
-            (lasts_days[1] - lasts_days[0]) / lasts_days[0]* 100).item()
+            (lasts_days[1] - lasts_days[0]) / lasts_days[0]* 100)
         )
 
     table = table.with_columns(
@@ -49,7 +49,6 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
         day_variation=pl.lit(day_variation),
         quote_type=pl.lit(quote_type),
     )
-    print(table)
     return table
 
 
