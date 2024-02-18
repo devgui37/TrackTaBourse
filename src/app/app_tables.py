@@ -14,7 +14,7 @@ def ordres_groupby(df_ordres: pl.DataFrame) -> pl.DataFrame:
             pl.col("frais").sum(),
             pl.col("montant_net").sum(),
             pl.col("nombre").sum(),
-            ((pl.col("cours_unit") * pl.col("nombre")).sum() / pl.sum("nombre"))
+            ((pl.col("cours_unit") * pl.col("nombre")).sum() / pl.col("nombre").sum())
             .round(2)
             .alias("PRU"),
         )
@@ -25,7 +25,7 @@ def ordres_groupby(df_ordres: pl.DataFrame) -> pl.DataFrame:
 
 def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:pl.DataFrame) -> pl.DataFrame:
     table = ordres_groupby(df_ordres)
-    liste_isin = [isin for isin in table.iter_rows()]
+    liste_isin = [isin[0] for isin in table.iter_rows()]
     cotation = []
     code = []
     day_variation = []
@@ -38,9 +38,7 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
 
         lasts_days = df_cotation.select(isin).tail(2)
         day_variation.append((
-            (lasts_days[1] - lasts_days[0])
-            / lasts_days[0]
-            * 100).item()
+            (lasts_days[1] - lasts_days[0]) / lasts_days[0]* 100).item()
         )
 
     table = table.with_columns(
@@ -52,25 +50,24 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
     return table
 
 
-def prepare_table(df_releves, df_gb):
+def prepare_table(df_releves: pl.DataFrame, df_gb: pl.DataFrame) -> pl.DataFrame:
     df_cou = df_releves.filter(pl.col("type").str.starts_with("COU"))
     df_cou = df_cou.with_columns(pl.col("titre").alias("produit"))
     df_div = df_cou.group_by("produit").agg(pl.col("montant").sum())
     df_resume = df_gb.join(df_div, on="produit", how="outer")
     df_resume = df_resume.with_columns(pl.col("montant").fill_null(strategy="zero"))
     df_resume = df_resume.with_columns(
-        ((pl.col("cotation") - pl.col("PRU")) / pl.col("PRU") * 100)
-        .alias("evolution"),
-        (
-            (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre")
-        ).alias("perf"),
-        (
-            (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre") + pl.col("montant")
-        ).alias("perf_div"),
+        ((pl.col("cotation") - pl.col("PRU")) / pl.col("PRU") * 100
+         ).alias("evolution"),
+        ((pl.col("cotation") - pl.col("PRU")) * pl.col("nombre")
+         ).alias("perf"),
+        ((pl.col("cotation") - pl.col("PRU")) * pl.col("nombre") + pl.col("montant")
+         ).alias("perf_div"),
     )
 
     df_resume = df_resume.with_columns(
-        (pl.col("montant_net") + pl.col("perf")).alias("valeur")
+        (pl.col("montant_net") + pl.col("perf")
+         ).alias("valeur")
     )
 
     df_resume = df_resume.with_columns(pl.col("perf_div").fill_null(pl.col("perf")))
