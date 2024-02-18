@@ -51,24 +51,23 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
     return table
 
 
-def prepare_table(df_releves: pl.DataFrame, df_ordres, df_cotation,df_infos) -> pl.DataFrame:
-    df_gb = tab_gb_cotation(df_ordres, df_cotation,df_infos)
+def prepare_table(df_releves: pl.DataFrame, df_gb: pl.DataFrame) -> pl.DataFrame:
     df_cou = df_releves.filter(pl.col("type").str.starts_with("COU"))
     df_cou = df_cou.with_columns(pl.col("titre").alias("produit"))
     df_div = df_cou.group_by("produit").agg(pl.col("montant").sum())
     df_resume = df_gb.join(df_div, on="produit", how="outer")
     df_resume = df_resume.with_columns(pl.col("montant").fill_null(strategy="zero"))
     df_resume = df_resume.with_columns(
-        ((pl.col("cotation") - pl.col("PRU")) / pl.col("PRU") * 100
+        ((pl.col("cotation").first() - pl.col("PRU").first()) / pl.col("PRU").first() * 100
          ).alias("evolution"),
-        ((pl.col("cotation") - pl.col("PRU")) * pl.col("nombre")
+        ((pl.col("cotation").first() - pl.col("PRU").first()) * pl.col("nombre").first()
          ).alias("perf"),
-        ((pl.col("cotation") - pl.col("PRU")) * pl.col("nombre") + pl.col("montant")
+        ((pl.col("cotation").first() - pl.col("PRU").first()) * pl.col("nombre").first() + pl.col("montant").first()
          ).alias("perf_div"),
     )
 
     df_resume = df_resume.with_columns(
-        (pl.col("montant_net") + pl.col("perf")
+        (pl.col("montant_net").first() + pl.col("perf").first()
          ).alias("valeur")
     )
 

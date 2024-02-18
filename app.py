@@ -25,7 +25,7 @@ df_frais = dataframe_frais(df_ordres)
 
 df_coupon = df_releves.filter(pl.col("type").str.starts_with("COUPON"))
 df_ordres_gb = tab_gb_cotation(df_ordres, df_cotation,df_infos)
-df_resume = prepare_table(df_releves, df_ordres, df_cotation,df_infos)
+df_resume = prepare_table(df_releves, df_ordres_gb)
 
 list_isin = get_list_isin()
 datoum = df_evolution_portefeuille(list_isin)
