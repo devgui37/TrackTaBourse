@@ -59,8 +59,8 @@ def prepare_table(df_releves, df_gb):
     df_resume = df_gb.join(df_div, on="produit", how="outer")
     df_resume = df_resume.with_columns(pl.col("montant").fill_null(strategy="zero"))
     df_resume = df_resume.with_columns(
-        ((pl.col("cotation") - pl.col("PRU")) / pl.col("PRU") * 100)
-        .alias("evolution"),
+        evolution = ((pl.col("cotation") - pl.col("PRU")) / pl.col("PRU") * 100),
+        #.alias("evolution"),
         #(
         #    (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre")
         #).alias("perf"),
