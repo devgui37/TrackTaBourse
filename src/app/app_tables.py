@@ -67,7 +67,7 @@ def prepare_table(df_releves, df_gb):
         (
             pl.col("cotation")#.sub(pl.col("PRU"))) * pl.col("nombre") + pl.col("montant")
         ).alias("perf_div"),
-    )
+    ))
 
     df_resume = df_resume.with_columns(
         (pl.col("montant_net") + pl.col("perf")).alias("valeur")
