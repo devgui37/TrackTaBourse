@@ -25,7 +25,7 @@ def ordres_groupby(df_ordres: pl.DataFrame) -> pl.DataFrame:
 
 def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:pl.DataFrame) -> pl.DataFrame:
     table = ordres_groupby(df_ordres)
-    liste_isin = [isin[0] for isin in table.iter_rows()]
+    liste_isin = [isin for isin in table.iter_rows()]
     cotation = []
     code = []
     day_variation = []
@@ -59,13 +59,13 @@ def prepare_table(df_releves, df_gb):
     df_resume = df_gb.join(df_div, on="produit", how="outer")
     df_resume = df_resume.with_columns(pl.col("montant").fill_null(strategy="zero"))
     df_resume = df_resume.with_columns(
-        ((pl.col("cotation").tail(1).sub(pl.col("PRU")).tail(1)).truediv(pl.col("PRU").tail(1))*100)
+        ((pl.col("cotation") - pl.col("PRU")) / pl.col("PRU") * 100)
         .alias("evolution"),
         (
-            (pl.col("cotation").tail(1).sub(pl.col("PRU").tail(1))) * pl.col("nombre").tail(1)
+            (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre")
         ).alias("perf"),
         (
-            (pl.col("cotation").tail(1).sub(pl.col("PRU").tail(1))) * pl.col("nombre").tail(1) + pl.col("montant").tail(1)
+            (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre") + pl.col("montant")
         ).alias("perf_div"),
     )
 
