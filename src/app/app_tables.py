@@ -51,7 +51,8 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
     return table
 
 
-def prepare_table(df_releves: pl.DataFrame, df_gb: pl.DataFrame) -> pl.DataFrame:
+def prepare_table(df_releves: pl.DataFrame, df_ordres, df_cotation,df_infos) -> pl.DataFrame:
+    df_gb = tab_gb_cotation(df_ordres, df_cotation,df_infos)
     df_cou = df_releves.filter(pl.col("type").str.starts_with("COU"))
     df_cou = df_cou.with_columns(pl.col("titre").alias("produit"))
     df_div = df_cou.group_by("produit").agg(pl.col("montant").sum())
