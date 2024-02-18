@@ -58,22 +58,22 @@ def prepare_table(df_releves, df_gb):
     df_div = df_cou.group_by("produit").agg(pl.col("montant").sum())
     df_resume = df_gb.join(df_div, on="produit", how="outer")
     df_resume = df_resume.with_columns(pl.col("montant").fill_null(strategy="zero"))
-    df_resume = df_resume.with_columns(
-        ((pl.col("cotation").sub(pl.col("PRU"))).truediv(pl.col("PRU") * 100))
-        .alias("evolution"),
-        (
-            (pl.col("cotation").sub(pl.col("PRU"))) * pl.col("nombre")
-        ).alias("perf"),
-        (
-            (pl.col("cotation").sub(pl.col("PRU"))) * pl.col("nombre") + pl.col("montant")
-        ).alias("perf_div"),
-    )
-
-    df_resume = df_resume.with_columns(
-        (pl.col("montant_net") + pl.col("perf")).alias("valeur")
-    )
-
-    df_resume = df_resume.with_columns(pl.col("perf_div").fill_null(pl.col("perf")))
+    #df_resume = df_resume.with_columns(
+    #    ((pl.col("cotation").sub(pl.col("PRU"))).truediv(pl.col("PRU"))*100)
+    #    .alias("evolution"),
+    #    (
+    #        (pl.col("cotation").sub(pl.col("PRU"))) * pl.col("nombre")
+    #    ).alias("perf"),
+    #    (
+    #        (pl.col("cotation").sub(pl.col("PRU"))) * pl.col("nombre") + pl.col("montant")
+    #    ).alias("perf_div"),
+    #)
+#
+    #df_resume = df_resume.with_columns(
+    #    (pl.col("montant_net") + pl.col("perf")).alias("valeur")
+    #)
+#
+    #df_resume = df_resume.with_columns(pl.col("perf_div").fill_null(pl.col("perf")))
     return df_resume
 
 
