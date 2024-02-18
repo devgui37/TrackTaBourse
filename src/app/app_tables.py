@@ -49,6 +49,7 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
         day_variation=pl.lit(day_variation),
         quote_type=pl.lit(quote_type),
     )
+    print(table)
     return table
 
 
