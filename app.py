@@ -18,7 +18,7 @@ from src.app.app_data import dataframe_frais
 
 df_ordres = pl.read_parquet("./data/parquet/ordres.parquet")
 df_releves = pl.read_parquet("./data/parquet/releves.parquet")
-infos = pl.read_parquet(".\data\parquet\infos.parquet").select("isin", "ticker")
+infos = pl.read_parquet("./data/parquet/infos.parquet").select("isin", "ticker")
 df_frais = dataframe_frais(df_ordres)
 
 df_coupon = df_releves.filter(pl.col("type").str.starts_with("COUPON"))
