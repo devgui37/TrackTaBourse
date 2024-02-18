@@ -18,11 +18,13 @@ from src.app.app_data import dataframe_frais
 
 df_ordres = pl.read_parquet("./data/parquet/ordres.parquet")
 df_releves = pl.read_parquet("./data/parquet/releves.parquet")
-infos = pl.read_parquet("./data/parquet/infos.parquet").select("isin", "ticker")
+df_cotation = pl.read_parquet("./data/parquet/cotation.parquet")
+df_infos = pl.read_parquet("./data/parquet/infos.parquet")
+infos = df_infos.select("isin", "ticker")
 df_frais = dataframe_frais(df_ordres)
 
 df_coupon = df_releves.filter(pl.col("type").str.starts_with("COUPON"))
-df_ordres_gb = tab_gb_cotation(df_ordres)
+df_ordres_gb = tab_gb_cotation(df_ordres, df_cotation,df_infos)
 df_resume = prepare_table(df_releves, df_ordres_gb)
 
 list_isin = get_list_isin()

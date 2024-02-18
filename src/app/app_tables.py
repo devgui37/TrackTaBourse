@@ -23,7 +23,7 @@ def ordres_groupby(df_ordres: pl.DataFrame) -> pl.DataFrame:
     return df_join
 
 
-def tab_gb_cotation(df_ordres: pl.DataFrame) -> pl.DataFrame:
+def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:pl.DataFrame) -> pl.DataFrame:
     table = ordres_groupby(df_ordres)
     liste_isin = [isin[0] for isin in table.iter_rows()]
     cotation = []
@@ -32,20 +32,19 @@ def tab_gb_cotation(df_ordres: pl.DataFrame) -> pl.DataFrame:
     quote_type = []
 
     for isin in liste_isin:
-        titre = yf.Ticker(isin)
-        cotation.append(titre.history(period="1mo").tail(1)["Close"].item())
-        code.append(titre.ticker)
-        quote_type.append(titre.get_info()["quoteType"])
+        cotation.append(df_cotation.select(isin).tail(1).item())
+        code.append(df_infos.filter(pl.col("isin") == isin).select("ticker").item())
+        quote_type.append(df_infos.filter(pl.col("isin") == isin).select("type").item())
 
-        lasts_days = titre.history(period="1mo").tail(2)
-        day_variation.append(
-            (lasts_days["Close"][1] - lasts_days["Close"][0])
-            / lasts_days["Close"][0]
-            * 100
+        lasts_days = df_cotation.select(isin).tail(2)
+        day_variation.append((
+            (lasts_days[1] - lasts_days[0])
+            / lasts_days[0]
+            * 100).item()
         )
 
     table = table.with_columns(
-        code=pl.lit(code).str.replace(".PA", ""),
+        code=pl.lit(code),#.str.replace(".PA", ""),
         cotation=pl.lit(cotation),
         day_variation=pl.lit(day_variation),
         quote_type=pl.lit(quote_type),
