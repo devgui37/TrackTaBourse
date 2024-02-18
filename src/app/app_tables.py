@@ -2,6 +2,7 @@ import streamlit as st
 import polars as pl
 from src.app.app_function import background_color_table
 import yfinance as yf
+import numpy as np
 
 
 def ordres_groupby(df_ordres: pl.DataFrame) -> pl.DataFrame:
@@ -25,7 +26,8 @@ def ordres_groupby(df_ordres: pl.DataFrame) -> pl.DataFrame:
 
 def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:pl.DataFrame) -> pl.DataFrame:
     table = ordres_groupby(df_ordres)
-    liste_isin = [isin[0] for isin in table.iter_rows()]
+    #liste_isin = [isin[0] for isin in table.iter_rows()]
+    liste_isin = list(np.unique(df_ordres.select("isin")))
     cotation = []
     code = []
     day_variation = []
