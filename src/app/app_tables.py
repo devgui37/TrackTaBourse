@@ -59,15 +59,15 @@ def prepare_table(df_releves, df_gb):
     df_resume = df_gb.join(df_div, on="produit", how="outer")
     df_resume = df_resume.with_columns(pl.col("montant").fill_null(strategy="zero"))
     df_resume = df_resume.with_columns(
-        (pl.col("cotation")#.sub(pl.col("PRU"))).truediv(pl.col("PRU"))*100)
+        ((pl.col("cotation").tail(1).sub(pl.col("PRU")).tail(1)).truediv(pl.col("PRU").tail(1))*100)
         .alias("evolution"),
         (
-            pl.col("cotation")#.sub(pl.col("PRU"))) * pl.col("nombre")
+            (pl.col("cotation").tail(1).sub(pl.col("PRU").tail(1))) * pl.col("nombre").tail(1)
         ).alias("perf"),
         (
-            pl.col("cotation")#.sub(pl.col("PRU"))) * pl.col("nombre") + pl.col("montant")
+            (pl.col("cotation").tail(1).sub(pl.col("PRU").tail(1))) * pl.col("nombre").tail(1) + pl.col("montant").tail(1)
         ).alias("perf_div"),
-    ))
+    )
 
     df_resume = df_resume.with_columns(
         (pl.col("montant_net") + pl.col("perf")).alias("valeur")
