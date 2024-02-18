@@ -61,12 +61,12 @@ def prepare_table(df_releves, df_gb):
     df_resume = df_resume.with_columns(
         ((pl.col("cotation") - pl.col("PRU")) / pl.col("PRU") * 100)
         .alias("evolution"),
-        (
-            (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre")
-        ).alias("perf"),
-        (
-            (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre") + pl.col("montant")
-        ).alias("perf_div"),
+        #(
+        #    (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre")
+        #).alias("perf"),
+        #(
+        #    (pl.col("cotation") - pl.col("PRU")) * pl.col("nombre") + pl.col("montant")
+        #).alias("perf_div"),
     )
 
     df_resume = df_resume.with_columns(
