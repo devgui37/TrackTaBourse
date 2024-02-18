@@ -26,8 +26,7 @@ def ordres_groupby(df_ordres: pl.DataFrame) -> pl.DataFrame:
 
 def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:pl.DataFrame) -> pl.DataFrame:
     table = ordres_groupby(df_ordres)
-    #liste_isin = [isin[0] for isin in table.iter_rows()]
-    liste_isin = list(np.unique(df_ordres.select("isin")))
+    liste_isin = [isin[0] for isin in table.iter_rows()]
     cotation = []
     code = []
     day_variation = []
@@ -39,8 +38,8 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
         quote_type.append(df_infos.filter(pl.col("isin") == isin).select("type").item())
 
         lasts_days = df_cotation.select(isin).tail(2)
-        day_variation.append((
-            (lasts_days[1] - lasts_days[0]) / lasts_days[0]* 100)
+        day_variation.append(
+            ((lasts_days[1] - lasts_days[0]) / lasts_days[0]* 100).item()
         )
 
     table = table.with_columns(
