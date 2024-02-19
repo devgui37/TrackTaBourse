@@ -1,5 +1,7 @@
 # TrackTaBourse - ⏳ **En développemment**
 
+➡ [Exemple de l'application](https://tracktabourse.streamlit.app/). ⬅
+
 ## Infos Général
 
 ### Compatibilité :
@@ -12,7 +14,7 @@
 ### Installation
 
 ```powershell
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Input
