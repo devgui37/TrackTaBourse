@@ -43,10 +43,10 @@ def tab_gb_cotation(df_ordres: pl.DataFrame, df_cotation:pl.DataFrame, df_infos:
         )
 
     table = table.with_columns(
-        code=pl.lit(code),#.str.replace(".PA", ""),
-        cotation=pl.lit(cotation),
-        day_variation=pl.lit(day_variation),
-        quote_type=pl.lit(quote_type),
+        pl.Series(name = "code", values=code),
+        pl.Series(name = "cotation", values=cotation),
+        pl.Series(name = "day_variation", values=day_variation),
+        pl.Series(name = "quote_type", values=quote_type),
     )
     return table
 
