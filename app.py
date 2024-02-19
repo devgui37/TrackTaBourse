@@ -12,9 +12,17 @@ from src.app.app_plot import (
     graph_frais_moyen,
     graph_coupon_temps
 )
-from src.scrap.yf import get_list_isin, df_evolution_portefeuille
+from src.scrap.yf import get_list_isin, df_evolution_portefeuille, df_creata_all_cotation
 from src.app.app_function import remove_white_space, css_button, css_tabs
-from src.app.app_data import dataframe_frais
+from src.app.app_data import (
+    dataframe_frais, 
+    nombre_versement, 
+    nombre_delta_titre,
+    nombre_performance_titre,
+    nombre_total_dividende,
+    nombre_total_titre,
+    nombre_total_achat,
+    nombre_total_portefeuille)
 
 df_ordres = pl.read_parquet("./data/parquet/ordres.parquet")
 df_releves = pl.read_parquet("./data/parquet/releves.parquet")
@@ -30,35 +38,13 @@ df_resume = prepare_table(df_releves, df_ordres_gb)
 list_isin = get_list_isin()
 datoum = df_evolution_portefeuille(list_isin)
 
-total_titre = round(df_resume.select("valeur").sum().item(), 2)
-total_div = (
-    df_releves.filter(pl.col("type").str.starts_with("COU"))
-    .select("montant")
-    .sum()
-    .item()
-)
-total_achat = df_resume.select("montant_net").sum().item()
-versement = (
-    df_releves.filter(pl.col("type").str.starts_with("VIR"))
-    .select("montant")
-    .sum()
-    .item()
-)
-total_port = round(versement + (total_titre - total_achat) + total_div, 2)
-delta_titre = round(
-    (
-        df_resume.select("valeur").sum().item()
-        - df_resume.select("montant_net").sum().item()
-    )
-    /  df_resume.select("montant_net").sum().item()
-    * 100,
-    2,
-)
-perf_titre = round(
-    df_resume.select("valeur").sum().item()
-    - df_resume.select("montant_net").sum().item(),
-    2,
-)
+total_titre = nombre_total_titre(df_resume)
+total_div = nombre_total_dividende(df_releves)
+total_achat = nombre_total_achat(df_resume)
+versement = nombre_versement(df_releves)
+total_port = nombre_total_portefeuille(versement, total_titre, total_achat, total_div)
+delta_titre = nombre_delta_titre(df_resume)
+perf_titre = nombre_performance_titre(df_resume)
 
 st.set_page_config(
     page_title="Bourse",
@@ -71,14 +57,31 @@ def main():
     remove_white_space()
     css_button()
     css_tabs()
+    with st.sidebar:
+        st.write("# Configuration")
+        st.divider()
+        st.write("### Actualisation")
+        if st.button("PDF Scraping", type="primary"):
+                subprocess.call(["python", "src/scrap/trigger.py"])
+        if st.button("MàJ Cotation", type = "primary"):
+            liste_isin = get_list_isin()
+            df_creata_all_cotation(liste_isin)
+        st.divider()
+        st.write("### Versement total")
+        st.write("Facultatif : utile si un versement a été fait depuis le dernier relevé d'espèces.")
+        versement = st.number_input("Versement", 
+                                    value=nombre_versement(df_releves),
+                                    step=100.)
+        total_port = nombre_total_portefeuille(versement, total_titre, total_achat, total_div)
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("## Portefeuille boursier 🧭 ")
     with col2:
         st.metric(
             label="Total Portefeuille",
-            value=str(total_port) + " €",
-            delta=str(round(100 * (total_port - versement) / versement, 2))
+            value=str(round(total_port,2)) + " €",
+            delta=str(round(100 * (total_port - versement) 
+                            / versement, 2))
             + " % ("
             + str(round(total_port - versement, 2))
             + "€)",
@@ -88,12 +91,7 @@ def main():
         ["🔍 Composition", "👑 Performance", "🐣 Investissement", "💰 Dividende", "💸 Frais"]
     )
     with tab1:
-        col1, col2 = st.columns([5, 1])
-        with col1:
-            st.subheader("Vue d'ensemble")
-        with col2:
-            if st.button("Actualisation", type="primary"):
-                subprocess.call(["python", "src/scrap/trigger.py"])
+        st.subheader("Vue d'ensemble")
         col1, col2 = st.columns([1, 1])
         with col1:
             st.metric(
@@ -103,7 +101,7 @@ def main():
                 delta_color="off",
             )
         with col2:
-            st.metric(label="Espèces", value=str(round(total_port - total_titre,2)) + " €")
+            st.metric(label="Espèces", value=str(round(versement - total_achat + total_div,2)) + " €")
         table_global(df_resume)
         st.divider()
         on = st.toggle("Graphique par type d'actif")
