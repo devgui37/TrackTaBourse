@@ -17,6 +17,7 @@ def _clean_format_A(df: pl.DataFrame) -> pl.DataFrame:
         pl.col("frais").str.replace(",", ".").cast(pl.Float64),
         pl.col("montant_net").str.replace(",", ".").cast(pl.Float64),
         pl.col("nombre").cast(pl.Int64),
+        pl.col("produit").str.replace(" ", "")
     )
     return data
 

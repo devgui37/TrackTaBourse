@@ -1,11 +1,11 @@
 """Module de scraping PDF boursorama"""
 
-import pdfplumber
+#import pdfplumber
 import re
 import os
 import glob
 import polars as pl
-
+from pypdf import PdfReader
 
 def _extract_fichiers(dossier: str, type: str) -> list[str]:
     """Récupère le chemin des fichiers PDF à scraper
@@ -32,9 +32,9 @@ def _extract_text(nom_fichier: str) -> str:
     Returns:
         str: contenu du PDF
     """
-    with pdfplumber.open(nom_fichier) as pdf:
-        page = pdf.pages[0]
-        text = page.extract_text()
+    reader = PdfReader(nom_fichier)
+    page = reader.pages[0]
+    text = page.extract_text()
     return text
 
 
@@ -49,12 +49,12 @@ def _re_date_name_number(text: str) -> tuple[str, str, str]:
 
     Returns:
     """
-    pattern = re.compile(r"exécution\s+(\d{2}/\d{2}/\d{4}) (\d+) (.+) Référence")
+    pattern = re.compile(r"exécution\n(\d{2}/\d{2}/\d{4})\n(\d{2}:\d{2}:\d{2})(\d+) (.+) Référence")
     match = pattern.search(text)
 
     date = match.group(1) if match else None
-    name = match.group(3) if match else None
-    number = match.group(2) if match else None
+    name = match.group(4) if match else None
+    number = match.group(3) if match else None
 
     return date, name, number
 
@@ -86,7 +86,7 @@ def _re_montants(text: str) -> tuple[str,str,str,str] | tuple[str,str,str]:
     """
     try:
         pattern = re.compile(
-            r"Montantnetaudébitdevotrecompte\s+(\d+,\d+)EUR (\d+,\d+)EUR (\d+,\d+)EUR (\d+,\d+)EUR"
+            r"compte\n(\d+,\d+)EUR\s?(\d+,\d+)EUR\s?(\d+,\d+)\s?EUR\s?\s?(\d+,\d+)\s?EUR"
         )
         match = pattern.search(text)
         montant_brut = match.group(1) if match else None
@@ -95,7 +95,7 @@ def _re_montants(text: str) -> tuple[str,str,str,str] | tuple[str,str,str]:
         montant_net = match.group(4)
     except AttributeError:
         pattern = re.compile(
-            r"Montantnetaudébitdevotrecompte\s+(\d+,\d+)EUR (\d+,\d+)EUR (\d+,\d+)EUR"
+            r"compte\n(\d+,\d+)\s?EUR\s?(\d+,\d+)\s?EUR\s?\s?(\d+,\d+)\s?EUR"
         )
         match = pattern.search(text)
         montant_brut = match.group(1) if match else None
@@ -113,7 +113,7 @@ def _re_cours(text: str) -> str:
 
     Returns:
     """
-    cours_pattern = re.compile(r"Coursexécuté: (\d+,\d+)EUR")
+    cours_pattern = re.compile(r"exécuté\s?:\s?(\d+,\d+)\s?EUR")
     cours_match = cours_pattern.search(text)
     cours = cours_match.group(1)
     return cours
@@ -127,7 +127,7 @@ def _re_isin(text: str) -> str:
 
     Returns:
     """
-    pattern = re.compile(r"CodeISIN: (.+) Coursexécuté")
+    pattern = re.compile(r"Code\s?ISIN\s?:\s?(.+)\s?Cours")
     match = pattern.search(text)
     isin = match.group(1)
     return isin
@@ -148,7 +148,7 @@ def re_pipeline(dossier: str = "./data/"):
             "date": _re_date_name_number(text)[0],
             "heure": _re_heure(text),
             "produit": _re_date_name_number(text)[1],
-            "isin": _re_isin(text),
+            "isin": _re_isin(text).strip(),
             "nombre": _re_date_name_number(text)[2],
             "cours": _re_cours(text),
             "montant_brut": _re_montants(text)[0],

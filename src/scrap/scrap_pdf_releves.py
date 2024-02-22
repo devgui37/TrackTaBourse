@@ -1,8 +1,22 @@
+import pdfplumber
 import re
 import polars as pl
 from cleaning import _clean_date, clean_format_R
-from scrap_pdf_avis import _extract_fichiers, _extract_text
+from scrap_pdf_avis import _extract_fichiers
 
+def _extract_text(nom_fichier: str) -> str:
+    """Récupère le contenu du PDF
+
+    Args:
+        nom_fichier (str): chemin
+
+    Returns:
+        str: contenu du PDF
+    """
+    with pdfplumber.open(nom_fichier) as pdf:
+        page = pdf.pages[0]
+        text = page.extract_text()
+    return text
 
 def _scraping_table_pdf(dossier: str = "./data") -> list[str] :
     resultats_list = []

@@ -62,10 +62,7 @@ def main():
         st.divider()
         st.write("### Actualisation")
         if st.button("PDF Scraping", type="primary"):
-            try:
-                subprocess.call(["python", "src/scrap/trigger.py"])
-            except:
-                pass
+            subprocess.call(["python", "src/scrap/trigger.py"])
         if st.button("MàJ Cotation", type = "primary"):
             liste_isin = get_list_isin()
             df_creata_all_cotation(liste_isin)
