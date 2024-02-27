@@ -86,7 +86,7 @@ def _re_montants(text: str) -> tuple[str,str,str,str] | tuple[str,str,str]:
     """
     try:
         pattern = re.compile(
-            r"compte\n(\d+,\d+)EUR\s?(\d+,\d+)EUR\s?(\d+,\d+)\s?EUR\s?\s?(\d+,\d+)\s?EUR"
+            r"compte\n(\d+,\d+)\s?EUR\s?(\d+,\d+)\s?EUR\s?(\d+,\d+)\s?EUR\s?\s?(\d+,\d+)\s?EUR"
         )
         match = pattern.search(text)
         montant_brut = match.group(1) if match else None

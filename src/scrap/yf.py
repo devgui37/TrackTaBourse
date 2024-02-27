@@ -40,7 +40,7 @@ def df_creata_all_cotation(liste_isin:list[str]) -> None:
         if df_all_cotation is None:
             df_all_cotation = df
         else:
-            df_all_cotation = df_all_cotation.join(df, on="date", how="outer")
+            df_all_cotation = df_all_cotation.join(df, on="date", how="left")
     df_all_cotation.write_parquet("./data/parquet/cotation.parquet")
     return None
 
@@ -83,7 +83,7 @@ def join_all_df_cotation(liste_isin: str, variable : str) -> pl.DataFrame:
         if df_all is None:
             df_all = df
         else:
-            df_all = df_all.join(df, on="date", how="outer")
+            df_all = df_all.join(df, on="date", how="left")
 
     df_all = df_all.with_columns(
         pl.fold(
